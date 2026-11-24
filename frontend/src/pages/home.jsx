@@ -10,7 +10,7 @@ export default function Home() {
   });
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/projects')
+    fetch('https://amari-kai-website-fougznvak-amari-kai-investments.vercel.app/api/projects')
       .then(res => res.json())
       .then(data => setProjects(data))
       .catch(err => console.error("Error fetching projects:", err));
@@ -24,7 +24,7 @@ export default function Home() {
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      const response = await fetch('http://localhost:5000/api/inquiries', {
+      const response = await fetch('https://amari-kai-website-fougznvak-amari-kai-investments.vercel.app/api/inquiries', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
