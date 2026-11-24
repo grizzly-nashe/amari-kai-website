@@ -17,6 +17,7 @@ app.use(express.json());
 // PostgreSQL Connection
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
+  ssl: { rejectUnauthorized: false }
 });
 
 // Cloudinary Configuration
