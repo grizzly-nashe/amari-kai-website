@@ -23,7 +23,7 @@ export default function Admin() {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch('http://localhost:5000/api/admin/login', {
+      const response = await fetch('https://amari-kai-website-fougznvak-amari-kai-investments.vercel.app/api/admin/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password })
@@ -43,7 +43,7 @@ export default function Admin() {
   useEffect(() => {
     if (loggedIn) {
       setLoading(true);
-      fetch('http://localhost:5000/api/admin/inquiries')
+      fetch('https://amari-kai-website-fougznvak-amari-kai-investments.vercel.app/api/admin/inquiries')
         .then(res => res.json())
         .then(data => { setInquiries(data); setLoading(false); })
         .catch(err => { console.error(err); setLoading(false); });
@@ -52,7 +52,7 @@ export default function Admin() {
 
   const fetchProjects = () => {
     setLoadingProjects(true);
-    fetch('http://localhost:5000/api/admin/projects')
+    fetch('https://amari-kai-website-fougznvak-amari-kai-investments.vercel.app/api/admin/projects')
       .then(res => res.json())
       .then(data => { setProjects(data); setLoadingProjects(false); })
       .catch(err => { console.error(err); setLoadingProjects(false); });
@@ -75,7 +75,7 @@ export default function Admin() {
     formData.append('description', description);
 
     try {
-      const response = await fetch('http://localhost:5000/api/admin/upload', {
+      const response = await fetch('https://amari-kai-website-fougznvak-amari-kai-investments.vercel.app/api/admin/upload', {
         method: 'POST',
         body: formData
       });
@@ -100,7 +100,7 @@ export default function Admin() {
     if (!window.confirm("Are you sure you want to delete this project? This cannot be undone.")) return;
     
     try {
-      const response = await fetch(`http://localhost:5000/api/admin/projects/${id}`, {
+      const response = await fetch(`https://amari-kai-website-fougznvak-amari-kai-investments.vercel.app/api/admin/projects/${id}`, {
         method: 'DELETE'
       });
       const data = await response.json();
