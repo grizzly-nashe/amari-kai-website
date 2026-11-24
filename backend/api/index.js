@@ -12,7 +12,7 @@ const PORT = process.env.PORT || 5000;
 
 // Middleware
 app.use(cors());
-app.options('*', cors());
+app.options('/(.*)/', cors()); 
 app.use(express.json());
 
 // PostgreSQL Connection
