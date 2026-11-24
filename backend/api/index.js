@@ -141,6 +141,4 @@ app.delete('/api/admin/projects/:id', async (req, res) => {
 });
 
 // Start Server
-app.listen(PORT, () => {
-  console.log(`Amari-Kai Backend running on http://localhost:${PORT}`);
-});
+module.exports = app;
