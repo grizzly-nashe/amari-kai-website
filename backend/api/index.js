@@ -10,9 +10,22 @@ require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Middleware
-app.use(cors());
-app.options('/(.*)/', cors()); 
+// --- CORS CONFIGURATION ---
+const corsOptions = {
+  origin: 'https://amari-kai-website-mdsy.vercel.app',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
+  credentials: true,
+  optionsSuccessStatus: 200 
+};
+
+// Apply CORS middleware to all routes
+app.use(cors(corsOptions));
+
+// Explicitly handle ALL preflight OPTIONS requests
+app.options('*', cors(corsOptions));
+// --------------------------
+
 app.use(express.json());
 
 // PostgreSQL Connection
@@ -28,7 +41,7 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
-// Multer Setup (for handling file uploads in memory)
+// Multer Setup
 const upload = multer({ storage: multer.memoryStorage() });
 
 // 1. API ROUTE: Handle Client Inquiries
