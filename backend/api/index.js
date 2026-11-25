@@ -10,22 +10,8 @@ require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// --- CORS CONFIGURATION ---
-const corsOptions = {
-  origin: 'https://amari-kai-website-mdsy.vercel.app',
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
-  credentials: true,
-  optionsSuccessStatus: 200 
-};
-
-// Apply CORS middleware to all routes
-app.use(cors(corsOptions));
-
-// Explicitly handle ALL preflight OPTIONS requests
-app.options('*', cors(corsOptions));
-// --------------------------
-
+// Middleware
+app.use(cors()); // Vercel will handle the explicit CORS headers at the edge via vercel.json
 app.use(express.json());
 
 // PostgreSQL Connection
@@ -154,5 +140,5 @@ app.delete('/api/admin/projects/:id', async (req, res) => {
   }
 });
 
-// Start Server
+// Export the app for Vercel
 module.exports = app;
