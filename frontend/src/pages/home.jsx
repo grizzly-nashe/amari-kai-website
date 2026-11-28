@@ -1,18 +1,19 @@
 import { useState, useEffect } from 'react';
+import { API } from '../config';
 
 export default function Home() {
   const [submitted, setSubmitted] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false); 
-  const [projects, setProjects] = useState([]); 
-  
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [projects, setProjects] = useState([]);
+
   const [formData, setFormData] = useState({
     firstName: '', lastName: '', email: '', phone: '', address: '', service: 'Construction', message: ''
   });
 
   useEffect(() => {
-    fetch('https://amari-kai-website-fougznvak-amari-kai-investments.vercel.app/api/projects')
+    fetch(`${API}/api/projects`)
       .then(res => res.json())
-      .then(data => setProjects(data))
+      .then(data => setProjects(Array.isArray(data) ? data : []))
       .catch(err => console.error("Error fetching projects:", err));
   }, []);
 
@@ -24,12 +25,12 @@ export default function Home() {
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      const response = await fetch('https://amari-kai-website-fougznvak-amari-kai-investments.vercel.app/api/inquiries', {
+      const response = await fetch(`${API}/api/inquiries`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
       });
-      
+
       if (response.ok) {
         setSubmitted(true);
         setFormData({firstName: '', lastName: '', email: '', phone: '', address: '', service: 'Construction', message: ''});
@@ -85,11 +86,11 @@ export default function Home() {
           <h2>Landmark Projects <span style={{color: 'var(--accent)'}}>//</span></h2>
           <p className="projects-subtitle">A visual portfolio of durability, precision, and superior design.</p>
         </div>
-        
+
         <div className="carousel-container">
           {projects.length === 0 ? (
             <div style={{ color: 'white', textAlign: 'center', width: '100%', padding: '2rem' }}>
-              No projects uploaded yet. Go to the Admin Dashboard to add some!
+              Our latest projects are coming soon.
             </div>
           ) : (
             projects.map(project => (
@@ -110,7 +111,7 @@ export default function Home() {
           <h3 style={{ color: 'var(--accent)', fontSize: '1rem', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '1rem' }}>About Us</h3>
           <h1 style={{ fontSize: '4rem', color: 'var(--primary)', lineHeight: '1.1' }}>We Build for People</h1>
         </div>
-        
+
         <div style={{ height: '50vh', background: `url('https://images.unsplash.com/photo-1541888086925-ebbcbfddb471?auto=format&fit=crop&q=80') center/cover`, borderRadius: '8px', marginBottom: '4rem' }}></div>
 
         <div className="split-section" style={{ background: 'white' }}>
@@ -143,7 +144,6 @@ export default function Home() {
           </p>
         </div>
 
-        {/* REDUCED FORM HEIGHT */}
         <div className="contact-form" style={{ padding: '2rem 2.5rem' }}>
           {submitted ? (
             <div style={{ textAlign: 'center', padding: '2rem 0' }}>
@@ -163,7 +163,7 @@ export default function Home() {
                   <input type="text" name="lastName" required placeholder="Doe" onChange={handleChange} value={formData.lastName} style={{ padding: '0.5rem 0' }} />
                 </div>
               </div>
-              
+
               <div style={{ display: 'flex', gap: '1.5rem', marginBottom: '0.8rem' }}>
                 <div className="form-group" style={{ flex: 1, marginBottom: 0 }}>
                   <label>Email *</label>
