@@ -102,6 +102,75 @@ const publicIdFromUrl = (url) => {
   return match ? match[1] : null;
 };
 
+// ---------------------------------------------------------------
+// Email notification through Brevo (optional).
+// If the BREVO_* variables are not set, this quietly does nothing.
+// ---------------------------------------------------------------
+const escapeHtml = (value) =>
+  String(value || '').replace(/[&<>"']/g, (c) => (
+    { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
+  ));
+
+const looksLikeEmail = (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value || '');
+
+const sendInquiryEmail = async (inquiry) => {
+  const { BREVO_API_KEY, BREVO_SENDER_EMAIL, NOTIFY_EMAIL } = process.env;
+  if (!BREVO_API_KEY || !BREVO_SENDER_EMAIL || !NOTIFY_EMAIL) {
+    console.log('Brevo is not configured - skipping email notification');
+    return;
+  }
+
+  const fullName = `${inquiry.firstName} ${inquiry.lastName}`;
+  const recipients = NOTIFY_EMAIL.split(',')
+    .map((e) => e.trim())
+    .filter(Boolean)
+    .map((email) => ({ email }));
+
+  const rows = [
+    ['Name', fullName],
+    ['Email', inquiry.email],
+    ['Phone', inquiry.phone],
+    ['Address', inquiry.address],
+    ['Service', inquiry.service],
+    ['Message', inquiry.message],
+  ]
+    .map(([label, value]) =>
+      `<tr><td style="padding:6px 12px;font-weight:bold;vertical-align:top">${label}</td>` +
+      `<td style="padding:6px 12px;white-space:pre-wrap">${escapeHtml(value) || '-'}</td></tr>`
+    )
+    .join('');
+
+  try {
+    const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+      method: 'POST',
+      headers: {
+        'api-key': BREVO_API_KEY,
+        'content-type': 'application/json',
+        accept: 'application/json',
+      },
+      body: JSON.stringify({
+        sender: { name: process.env.BREVO_SENDER_NAME || 'Amari-Kai Website', email: BREVO_SENDER_EMAIL },
+        to: recipients,
+        // Pressing "Reply" in your inbox answers the client directly
+        replyTo: looksLikeEmail(inquiry.email) ? { email: inquiry.email, name: fullName } : undefined,
+        subject: `New ${inquiry.service || 'website'} inquiry from ${fullName}`.replace(/[\r\n]+/g, ' '),
+        htmlContent:
+          '<h2>New inquiry from the Amari-Kai website</h2>' +
+          `<table style="border-collapse:collapse;font-family:Arial,sans-serif;font-size:14px">${rows}</table>` +
+          '<p style="color:#777;font-size:12px">You can also see it in the admin dashboard.</p>',
+      }),
+      signal: AbortSignal.timeout(8000),
+    });
+
+    if (!response.ok) {
+      console.error('Brevo error:', response.status, await response.text());
+    }
+  } catch (err) {
+    // An email problem must never stop the inquiry from being saved
+    console.error('Brevo send failed:', err.message);
+  }
+};
+
 // Protects admin routes: expects "Authorization: Bearer <token>"
 const requireAuth = (req, res, next) => {
   const token = (req.headers.authorization || '').split(' ')[1];
@@ -150,6 +219,7 @@ app.post('/api/inquiries', async (req, res) => {
     );
 
     console.log(`New inquiry received from ${firstName} ${lastName}`);
+    await sendInquiryEmail({ firstName, lastName, email, phone, address, service, message });
     res.status(201).json({ success: true, message: 'Inquiry saved successfully!' });
   } catch (err) {
     console.error(err.message);
